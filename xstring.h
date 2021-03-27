@@ -113,7 +113,6 @@ void __xs_cow_write_end(xs *dest);
   do {                                                                         \
     __xs_cow_write(cpy);                                                       \
     xs_concat(cpy, prefix, suffix);                                            \
-    __xs_cow_write_end(cpy);                                                   \
   } while (0)
 
 xs *xs_new_self(xs *x, const void *p);

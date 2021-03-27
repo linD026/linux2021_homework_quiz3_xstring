@@ -50,4 +50,13 @@ int main() {
     xs_new(&small, small_string);
     assert(!xs_is_ptr(&small));
     printf("second store(stack) check\n");
+
+
+    xs small_grow;
+    xs_new(&small_grow, "0000000000");
+    xs_concat(&small_grow, &prefix, &suffix);
+    xs grab;
+    xs_new(&grab, "xxxxxx y0000000000y xxxxxx");
+    assert(xs_data(&grab) == xs_data(&small_grow));
+    printf("small string grow check\n");
 }

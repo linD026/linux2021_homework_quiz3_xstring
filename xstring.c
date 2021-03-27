@@ -158,13 +158,13 @@ void __xs_cow_write(xs *dest) {
   if (!xs_is_ptr(dest) && !dest->sharing)
     return;
 
-  CSTR_LOCK();
+  // CSTR_LOCK();
   xs *src =
       cstr_interning(xs_data(dest), xs_size(dest), hash_blob(xs_data(dest), xs_size(dest)));
   xs_dec_refcnt(src);
   if (xs_get_refcnt(src) < 0)
     xs_set_refcnt(src, 0);
-  CSTR_UNLOCK();
+  // CSTR_UNLOCK();
 
   dest->sharing = false;
   char *temp = xs_data(dest);
@@ -266,9 +266,13 @@ xs *xs_concat(xs *string, const xs *prefix, const xs *suffix) {
     memcpy(tmpdata + pres, data, size);
     memcpy(tmpdata, pre, pres);
     memcpy(tmpdata + pres + size, suf, sufs + 1);
+
     xs_free(string);
-    *string = tmps;
-    string->size = size + pres + sufs;
+    xs_new(string, xs_data(&tmps));
+
+    xs_set_refcnt(&tmps, 0);
+    tmps.sharing = false;
+    xs_free(&tmps);
   }
   return string;
 }

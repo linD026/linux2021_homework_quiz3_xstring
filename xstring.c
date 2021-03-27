@@ -158,13 +158,13 @@ void __xs_cow_write(xs *dest) {
   if (!xs_is_ptr(dest) && !dest->sharing)
     return;
 
-  // CSTR_LOCK();
+  CSTR_LOCK();
   xs *src =
-      cstr_interning(xs_data(dest), xs_size(dest), hash_blob(xs_data(dest), xs_size(dest)));
+        interning(&__cstr_ctx, xs_data(dest), xs_size(dest), hash_blob(xs_data(dest), xs_size(dest)));
   xs_dec_refcnt(src);
   if (xs_get_refcnt(src) < 0)
     xs_set_refcnt(src, 0);
-  // CSTR_UNLOCK();
+  CSTR_UNLOCK();
 
   dest->sharing = false;
   char *temp = xs_data(dest);

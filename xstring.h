@@ -118,6 +118,8 @@ void __xs_cow_write_end(xs *dest);
 xs *xs_new_self(xs *x, const void *p);
 bool xs_cow_copy_self(xs *dest, xs *src);
 void __xs_cow_write_self(xs *dest, xs *src);
+xs *xs_concat_self(xs *string, const xs *prefix, const xs *suffix);
+
 
 #define xs_cow_write_trim_self(cpy, trimeset, src)                                  \
   do {                                                                         \

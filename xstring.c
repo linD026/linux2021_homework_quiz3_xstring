@@ -204,7 +204,7 @@ xs *xs_grow(xs *x, size_t len) {
   if (len <= xs_capacity(x))
     return x;
 
-  CSTR_LOCK();
+  // CSTR_LOCK();
   /* Backup first */
   if (!xs_is_ptr(x))
     memcpy(buf, x->data, 16);
@@ -218,7 +218,7 @@ xs *xs_grow(xs *x, size_t len) {
     xs_allocate_data(x, len, 0);
     memcpy(xs_data(x), buf, 16);
   }
-  CSTR_UNLOCK();
+  // CSTR_UNLOCK();
   return x;
 }
 
@@ -360,4 +360,35 @@ void __xs_cow_write_self(xs *dest, xs *src) {
   xs_dec_refcnt(src);
   if (xs_get_refcnt(src) < 1)
     xs_free(src);
+}
+
+xs *xs_concat_self(xs *string, const xs *prefix, const xs *suffix) {
+  size_t pres = xs_size(prefix), sufs = xs_size(suffix), size = xs_size(string),
+         capacity = xs_capacity(string);
+
+  char *pre = xs_data(prefix), *suf = xs_data(suffix), *data = xs_data(string);
+
+  // xs_cow_lazy_copy(string, &data);
+
+  if (size + pres + sufs <= capacity) {
+    memmove(data + pres, data, size);
+    memcpy(data, pre, pres);
+    memcpy(data + pres + size, suf, sufs + 1);
+
+    if (xs_is_ptr(string))
+      string->size = size + pres + sufs;
+    else
+      string->space_left = 15 - (size + pres + sufs);
+  } else {
+    xs tmps = xs_literal_empty();
+    xs_grow(&tmps, size + pres + sufs);
+    char *tmpdata = xs_data(&tmps);
+    memcpy(tmpdata + pres, data, size);
+    memcpy(tmpdata, pre, pres);
+    memcpy(tmpdata + pres + size, suf, sufs + 1);
+    xs_free(string);
+    *string = tmps;
+    string->size = size + pres + sufs;
+  }
+  return string;
 }
